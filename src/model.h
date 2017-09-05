@@ -18,7 +18,6 @@
 #include "args.h"
 #include "matrix.h"
 #include "vector.h"
-#include "qmatrix.h"
 #include "real.h"
 
 #define SIGMOID_TABLE_SIZE 512
@@ -39,13 +38,12 @@ class Model {
   private:
     std::shared_ptr<Matrix> wi_;
     std::shared_ptr<Matrix> wo_;
-    std::shared_ptr<QMatrix> qwi_;
-    std::shared_ptr<QMatrix> qwo_;
     std::shared_ptr<Args> args_;
     Vector hidden_;
     Vector output_;
     Vector grad_;
     int32_t hsz_;
+    int32_t isz_;
     int32_t osz_;
     real loss_;
     int64_t nexamples_;
@@ -88,10 +86,18 @@ class Model {
              Vector&) const;
     void findKBest(int32_t, std::vector<std::pair<real, int32_t>>&,
                    Vector&, Vector&) const;
+    void findKBestWeights(int32_t, std::vector<std::pair<real, int32_t>>&,
+                   Vector&, Vector&) const;
     void update(const std::vector<int32_t>&, int32_t, real);
     void computeHidden(const std::vector<int32_t>&, Vector&) const;
     void computeOutputSoftmax(Vector&, Vector&) const;
     void computeOutputSoftmax();
+    void predictWeights(const std::vector<int32_t>&, int32_t,
+                        std::vector<std::pair<real, int32_t>>&,
+                        Vector&, Vector&) const;
+    void predictWeights(const std::vector<int32_t>&, int32_t,
+                        std::vector<std::pair<real, int32_t>>&);
+    void computeClassWeights(Vector&, Vector&) const;
 
     void setTargetCounts(const std::vector<int64_t>&);
     void initTableNegatives(const std::vector<int64_t>&);
@@ -101,8 +107,6 @@ class Model {
     real log(real) const;
 
     std::minstd_rand rng;
-    bool quant_;
-    void setQuantizePointer(std::shared_ptr<QMatrix>, std::shared_ptr<QMatrix>, bool);
 };
 
 }
